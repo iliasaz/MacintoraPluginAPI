@@ -49,3 +49,13 @@ public protocol WalletTLSProvider: MacintoraPlugin {
     ///   say "not applicable."
     func walletMaterial(forWalletAt folder: URL) throws -> WalletTLSMaterial?
 }
+
+public extension WalletTLSProvider {
+    /// Default capability check: probe by attempting a load. This keeps adding
+    /// `canHandle` a non-breaking API change for existing conformers. Providers
+    /// SHOULD override it with a cheaper check (e.g. file existence), since it
+    /// runs in UI paths where a full load would be wasteful.
+    func canHandle(walletFolderAt folder: URL) -> Bool {
+        (try? walletMaterial(forWalletAt: folder)) != nil
+    }
+}

@@ -35,6 +35,12 @@ public struct WalletTLSMaterial: Sendable, Hashable {
 /// the first provider to return non-`nil` wins; returning `nil` means "not my
 /// wallet, fall back to the default."
 public protocol WalletTLSProvider: MacintoraPlugin {
+    /// Fast, side-effect-free check: does this provider handle the wallet at
+    /// `folder`? Used by the UI to decide an authentication mode (e.g. whether a
+    /// password is needed) without doing the full, potentially expensive load.
+    /// Should be cheap — typically a file-existence check.
+    func canHandle(walletFolderAt folder: URL) -> Bool
+
     /// Returns mTLS material for the wallet at `folder`, or `nil` if this
     /// provider doesn't handle that wallet.
     ///

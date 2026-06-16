@@ -6,6 +6,7 @@ private struct DummyWalletProvider: WalletTLSProvider {
     static let pluginID = "test.dummy.wallet"
     static let displayName = "Dummy Wallet"
     let material: WalletTLSMaterial?
+    func canHandle(walletFolderAt folder: URL) -> Bool { material != nil }
     func walletMaterial(forWalletAt folder: URL) throws -> WalletTLSMaterial? { material }
 }
 
@@ -40,6 +41,15 @@ final class PluginRegistryTests: XCTestCase {
 
     func test_emptyRegistryReturnsNoProviders() {
         XCTAssertTrue(PluginRegistry().plugins(WalletTLSProvider.self).isEmpty)
+    }
+
+    func test_canHandleCapabilityQuery() {
+        let reg = PluginRegistry()
+        reg.register(DummyWalletProvider(material: WalletTLSMaterial(pkcs12DER: Data([0x30]), passphrase: [1])))
+        let providers = reg.plugins(WalletTLSProvider.self)
+        XCTAssertTrue(providers.contains { $0.canHandle(walletFolderAt: URL(filePath: "/any")) })
+        let none = PluginRegistry().plugins(WalletTLSProvider.self)
+        XCTAssertFalse(none.contains { $0.canHandle(walletFolderAt: URL(filePath: "/any")) })
     }
 
     func test_instanceConveniences() {
